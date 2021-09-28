@@ -10,4 +10,6 @@ create virtual environment using requirements.txt(python -m venv)
 
 avtivate venv(venv\Scripts\activate.bat)
 
+pip install -r requirements.txt
+
 open project and run app.py
