@@ -567,7 +567,7 @@ components:
       properties:
         id:
           type: integer
-          format: uuid
+          format: int64
         username:
           type: string
         password:
@@ -605,7 +605,7 @@ components:
       properties:
         id: 
           type: integer
-          format: uuid
+          format: int64
         title:
           type: string
           example: 'Jazz Enjoyment'
@@ -618,7 +618,7 @@ components:
             $ref: '#/components/schemas/Song'
         userId:
           type: integer
-          format: uuid
+          format: int64
         private:
           type: boolean
           description: Private Playlist
