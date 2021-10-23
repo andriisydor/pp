@@ -13,3 +13,6 @@ avtivate venv(venv\Scripts\activate.bat)
 pip install -r requirements.txt
 
 open project and run app.py
+
+to create migration: alembic revision -- autogenerate -m "add create_models"
+to run: alembic upgrade head
