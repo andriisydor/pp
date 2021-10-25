@@ -20,4 +20,6 @@ session.add(playlist2)
 session.commit()
 
 print(session.query(Playlist).all())
+print(session.query(User).all())
+print(session.query(Song).all())
 session.close()
