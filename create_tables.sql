@@ -1,45 +1,32 @@
-create table public.user(
-	id Serial ,
-	username varchar,
-	password varchar,
-	email varchar,
-	primary key(id)
+CREATE TABLE user (
+	id INT NOT NULL AUTO_INCREMENT,
+	username VARCHAR(200),
+	password VARCHAR(200),
+	email VARCHAR(200),
+    PRIMARY KEY (id)
 );
 
-create table public.song(
-	id serial,
-	name varchar not null,
-	singer varchar,
-	album varchar,
-	duration varchar not null,
-	primary key (id)
+CREATE TABLE song (
+	id INT AUTO_INCREMENT,
+	name VARCHAR(200) NOT NULL,
+	singer VARCHAR(200),
+    album VARCHAR(200),
+    duration VARCHAR(200) NOT NULL,
+    PRIMARY KEY (id)
 );
 
-create table public.playlist(
-	id Serial,
-	title varchar,
-	user_id integer,
-	private boolean,
-	primary key(id)
+CREATE TABLE playlist (
+	id INT AUTO_INCREMENT,
+	title VARCHAR(200),
+    private BOOLEAN,
+    user_id INT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
-create table public.playlist_song(
-	playlist_id integer ,
-	song_id integer
+CREATE TABLE playlist_song (
+    playlist_id INT,
+    song_id INT,
+    FOREIGN KEY (playlist_id) REFERENCES playlist(id),
+    FOREIGN KEY (song_id) REFERENCES song(id)
 );
-
-ALTER TABLE public.playlist
-    ADD FOREIGN KEY (user_id)
-    REFERENCES public.user (id)
-    NOT VALID;
-
-ALTER TABLE public.playlist_song
-    ADD FOREIGN KEY (playlist_id)
-    REFERENCES public.playlist (id)
-    NOT VALID;
-
-
-ALTER TABLE playlist_song
-    ADD FOREIGN KEY (song_id)
-    REFERENCES song (id)
-    NOT VALID;
