@@ -421,6 +421,37 @@ paths:
       - playlist_auth:
         - write:playlist
         - read:playlist 
+        
+  /service/user/{userId}:      
+    get:
+      tags:
+      - service
+      summary: Get all playlists of specific user
+      description: Get all playlists of specific user and all public playlists in db
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 4
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Playlist'
+        400:
+          description: Invalid user ID supplied
+          content: {}
+      security:
+      - playlist_auth:
+        - write:playlist
+        - read:playlist 
     
   /user:
     post:
