@@ -6,7 +6,6 @@ from sqlalchemy import pool
 from alembic import context
 import os
 import sys
-sys.path.append("/home/yuliamarkiv/pp")
 from models import Base
 
 
@@ -15,7 +14,7 @@ from models import Base
 config = context.config
 config.set_main_option(
 "sqlalchemy.url",
-    os.getenv("DB_URI", "postgresql://tecmint:rolny34F@localhost:5432/test")
+    os.getenv("DB_URI", "mysql://root:A2452756b@127.0.0.1/music_player")
 )
 
 # Interpret the config file for Python logging.

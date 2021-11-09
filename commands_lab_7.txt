@@ -1,0 +1,50 @@
+mysql -u root -p music_player < create_tables.sql
+
+alembic downgrade -1
+alembic upgrade +1
+
+
+SONG
+
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"name\":\"How You Remind Me\", \"singer\": \"Avril Lavigne\", \"album\": \"Avril Lavigne\", \"duration\": \"4:06\"}" http://localhost:5000/song
+
+curl -X GET http://localhost:5000/song/1
+
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"name\":\"How to sing\", \"singer\": \"Avril Lavigne\", \"album\": \"Avril Lavigne\"}" http://localhost:5000/song/2
+
+curl -X DELETE http://localhost:5000/song/2
+
+
+Playlist
+
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"title\":\"Jazz Enjoyment\", \"user_id\": 1, \"private\":true}" http://localhost:5000/playlist
+
+curl -X GET http://localhost:5000/playlist/1
+
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"title\":\"Jazz Enjoyment 123\", \"user_id\":3}" http://localhost:5000/playlist/5
+
+curl -X DELETE http://localhost:5000/playlist/1
+
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"id\":1}" http://localhost:5000/playlist/song/1
+
+curl -X DELETE -H "Content-Type:application/json" --data-binary "{\"id\":1}" http://localhost:5000/playlist/song/1
+
+
+Service
+
+curl -X GET http://localhost:5000/service
+
+curl -X GET http://localhost:5000/service/1
+
+curl -X GET http://localhost:5000/service/user/2
+
+
+USER
+
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"username\":\"user123\", \"password\":\"qwerty123\", \"email\":\"tmp@gmail.com\"}" http://localhost:5000/user
+
+curl -X GET http://localhost:5000/user/login -H "Content-Type:application/json" --data "{\"username\":\"user12903\", \"password\":\"qwerty123\"}"
+
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"username\":\"user12d3\", \"email\":\"tmsfap@gmail.com\"}" http://localhost:5000/user/2
+
+curl -X DELETE http://localhost:5000/user/2
