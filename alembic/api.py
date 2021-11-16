@@ -9,7 +9,7 @@ from schemas import UserSchema, SongSchema, PlaylistSchema
 from models import Session, User, Playlist, Song, playlist_song
 
 api = Flask(__name__)
-api.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:A2452756b@127.0.0.1/music_player"
+api.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:123abc!!!@127.0.0.1:3306/music_player"
 db = SQLAlchemy(api)
 bcrypt = Bcrypt(api)
 
