@@ -8,13 +8,28 @@ from marshmallow import Schema, fields, ValidationError, pre_load
 from schemas import UserSchema, SongSchema, PlaylistSchema
 from models import Session, User, Playlist, Song, playlist_song
 
+# authentication
+from flask_httpauth import HTTPBasicAuth
+
+
 api = Flask(__name__)
 api.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:123abc!!!@127.0.0.1:3306/music_player"
 db = SQLAlchemy(api)
 bcrypt = Bcrypt(api)
 
+auth = HTTPBasicAuth()
+
+
+@auth.verify_password
+def verify_password(username, password):
+    session = Session()
+    user_data = session.query(User).filter_by(username=username).first()
+    if user_data and bcrypt.check_password_hash(user_data.password, password):
+        return username
+
 
 @api.route("/song", methods=["POST"])
+@auth.login_required
 def create_song():
     session = Session()
 
