@@ -14,7 +14,7 @@ from models import Base
 config = context.config
 config.set_main_option(
 "sqlalchemy.url",
-    os.getenv("DB_URI", "mysql://root:A2452756b@127.0.0.1/music_player")
+    os.getenv("DB_URI", "mysql://root:123abc!!!@127.0.0.1:3306/music_player")
 )
 
 # Interpret the config file for Python logging.
