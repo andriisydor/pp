@@ -28,6 +28,11 @@ def verify_password(username, password):
         return username
 
 
+@auth.error_handler
+def auth_error(status):
+    return "Access Denied", status
+
+
 @api.route("/song", methods=["POST"])
 @auth.login_required
 def create_song():
@@ -55,6 +60,7 @@ def create_song():
 
 
 @api.route("/song/<int:song_id>", methods=["GET"])
+@auth.login_required
 def get_song(song_id):
     session = Session()
     try:
@@ -65,6 +71,7 @@ def get_song(song_id):
 
 
 @api.route("/song/<int:song_id>", methods=["PUT"])
+@auth.login_required
 def update_song(song_id):
     session = Session()
     json_data = request.get_json()
@@ -104,6 +111,7 @@ def update_song(song_id):
 
 
 @api.route("/song/<int:song_id>", methods=["DELETE"])
+@auth.login_required
 def delete_song(song_id):
     session = Session()
     try:
