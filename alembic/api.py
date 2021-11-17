@@ -294,9 +294,10 @@ def delete_song_from_playlist(song_id):
 
 
 @api.route("/service", methods=["GET"])
+@auth.login_required
 def get_service_playlists():
     session = Session()
-    playlists = session.query(Playlist).all()
+    playlists = session.query(Playlist).filter_by(private='0').all()
     if not playlists:
         return {"message": "There are no playlists"}, 400
     schema = PlaylistSchema(many=True)
@@ -304,16 +305,25 @@ def get_service_playlists():
 
 
 @api.route("/service/<int:playlist_id>", methods=["GET"])
+@auth.login_required
 def get_service_playlist_by_id(playlist_id):
     session = Session()
     try:
         playlist = session.query(Playlist).filter_by(id=playlist_id).one()
     except NoResultFound:
         return {"message": "Playlist with this id does not exist."}, 400
+
+    # authentication
+    if playlist.private:
+        authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+        if authentication:
+            return authentication
+
     return jsonify(PlaylistSchema().dump(playlist))
 
 
 @api.route("/service/user/<int:user_id>", methods=["GET"])
+@auth.login_required
 def get_service_playlists_by_user_id(user_id):
     session = Session()
     try:
@@ -324,6 +334,12 @@ def get_service_playlists_by_user_id(user_id):
             return {"message": "User with this id does not exist."}, 400
     except NoResultFound:
         return {"message": "Playlist with this id does not exist."}, 400
+
+    # authentication
+    authentication = check_user_by_id(session, user_id, auth.current_user())
+    if authentication:
+        return authentication
+
     schema = PlaylistSchema(many=True)
     return jsonify(schema.dump(private_playlists + public_playlists))
 
