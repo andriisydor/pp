@@ -10,6 +10,7 @@ from models import Session, User, Playlist, Song, playlist_song
 
 # authentication
 from flask_httpauth import HTTPBasicAuth
+from access import check_user_by_id, check_user_by_found
 
 
 api = Flask(__name__)
@@ -381,6 +382,7 @@ def login_user():
 
 
 @api.route("/user/<int:user_id>", methods=["PUT"])
+@auth.login_required
 def update_user(user_id):
     session = Session()
     json_data = request.get_json()
@@ -389,6 +391,11 @@ def update_user(user_id):
         user = session.query(User).filter_by(id=user_id).one()
     except NoResultFound:
         return {"message": "User with this id does not exist."}, 400
+
+    # authentication of user
+    authentication = check_user_by_found(user, auth.current_user())
+    if authentication:
+        return authentication
 
     # checking if suitable new username
     exists = None
@@ -432,6 +439,7 @@ def update_user(user_id):
 
 
 @api.route("/user/<int:user_id>", methods=["DELETE"])
+@auth.login_required
 def delete_user(user_id):
     session = Session()
     try:
@@ -439,8 +447,15 @@ def delete_user(user_id):
     except NoResultFound:
         return {"message": "User with this id does not exist."}, 400
 
-    user = session.query(Playlist).filter_by(user_id=user_id).all()
-    if user:
+    # authentication of user
+    authentication = check_user_by_found(user, auth.current_user())
+    if authentication:
+        return authentication
+
+    # .all() -> .first()
+    # user -> playlist
+    playlist = session.query(Playlist).filter_by(user_id=user_id).first()
+    if playlist:
         return {"message": "Cannot delete user because it has playlists."}, 403
 
     session.delete(user)
