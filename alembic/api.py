@@ -130,6 +130,7 @@ def delete_song(song_id):
 
 
 @api.route("/playlist", methods=["POST"])
+@auth.login_required
 def create_playlist():
     session = Session()
 
@@ -152,6 +153,11 @@ def create_playlist():
     if not user_data:
         return {"message": "User with this id does not exist"}, 400
 
+    # authentication
+    authentication = check_user_by_found(user_data, auth.current_user())
+    if authentication:
+        return authentication
+
     session.add(playlist)
     session.commit()
 
@@ -159,6 +165,7 @@ def create_playlist():
 
 
 @api.route("/playlist/<int:playlist_id>", methods=["GET"])
+@auth.login_required
 def get_playlist(playlist_id):
     session = Session()
     try:
@@ -166,10 +173,16 @@ def get_playlist(playlist_id):
     except NoResultFound:
         return {"message": "Playlist with this id does not exist."}, 400
 
+    # authentication
+    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    if authentication and playlist.private:
+        return authentication
+
     return jsonify(PlaylistSchema().dump(playlist))
 
 
 @api.route("/playlist/<int:playlist_id>", methods=["PUT"])
+@auth.login_required
 def update_playlist(playlist_id):
     session = Session()
     json_data = request.get_json()
@@ -178,6 +191,11 @@ def update_playlist(playlist_id):
         playlist = session.query(Playlist).filter_by(id=playlist_id).one()
     except NoResultFound:
         return {"message": "Playlist with this id does not exist."}, 400
+
+    # authentication
+    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    if authentication and playlist.private:
+        return authentication
 
     # checking if suitable new user_id
 
@@ -218,6 +236,7 @@ def update_playlist(playlist_id):
 
 
 @api.route("/playlist/<int:playlist_id>", methods=["DELETE"])
+@auth.login_required
 def delete_playlist(playlist_id):
     session = Session()
     try:
@@ -225,12 +244,18 @@ def delete_playlist(playlist_id):
     except NoResultFound:
         return {"message": "Playlist with this id does not exist."}, 400
 
+    # authentication
+    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    if authentication and playlist.private:
+        return authentication
+
     session.delete(playlist)
     session.commit()
     return {"message": "Successfully deleted playlist."}
 
 
 @api.route("/playlist/song/<int:song_id>", methods=["PUT"])
+@auth.login_required
 def add_song_to_playlist(song_id):
     session = Session()
     json_data = request.get_json()
@@ -251,6 +276,11 @@ def add_song_to_playlist(song_id):
     except NoResultFound:
         return {"message": "Playlist with this id does not exist."}, 400
 
+    # authentication
+    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    if authentication and playlist.private:
+        return authentication
+
     playlist_dict = playlist.__dict__
     playlist_dict["songs"].append(song)
     session.commit()
@@ -259,6 +289,7 @@ def add_song_to_playlist(song_id):
 
 
 @api.route("/playlist/song/<int:song_id>", methods=["DELETE"])
+@auth.login_required
 def delete_song_from_playlist(song_id):
     session = Session()
     json_data = request.get_json()
@@ -281,6 +312,11 @@ def delete_song_from_playlist(song_id):
         playlist = session.query(Playlist).filter_by(id=playlist_id).one()
     except NoResultFound:
         return {"message": "Playlist with this id does not exist."}, 400
+
+    # authentication
+    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    if authentication and playlist.private:
+        return authentication
 
     playlist_dict = playlist.__dict__
 
