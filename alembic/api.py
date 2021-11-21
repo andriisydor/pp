@@ -198,12 +198,14 @@ def update_playlist(playlist_id):
         return authentication
 
     # checking if suitable new user_id
-
-    exists = None
     if "user_id" in json_data:
-        exists = session.query(User).filter_by(id=json_data["user_id"]).first()
-    if not exists:
-        return {"message": f"User with this id does not exist"}, 400
+        return {"message": f"You can not change the owner"}, 403
+
+    # exists = None
+    # if "user_id" in json_data:
+    #     exists = session.query(User).filter_by(id=json_data["user_id"]).first()
+    # if not exists:
+    #     return {"message": f"User with this id does not exist"}, 400
 
     # checking if suitable new title
     exists = None
@@ -213,7 +215,7 @@ def update_playlist(playlist_id):
         if exists and exists.id == playlist_id:
             exists = None
     if exists:
-        return {"message": f"User with id = {json_data['user_id']} already has a playlist with the same title"}, 400
+        return {"message": f"User with id = {exists.id} already has a playlist with the same title"}, 400
 
     attributes = Playlist.__dict__.keys()
 
