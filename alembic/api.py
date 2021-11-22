@@ -411,30 +411,6 @@ def create_user():
     return jsonify(UserSchema().dump(user))
 
 
-@api.route("/user/login", methods=["GET"])
-def login_user():
-    session = Session()
-
-    json_data = request.get_json()
-
-    if not json_data:
-        return {"message": "Input data is empty"}, 400
-
-    user_data = session.query(User).filter_by(username=json_data["username"]).first()
-
-    if not user_data:
-        return {"message": "User with this username does not exist"}, 400
-
-    if not bcrypt.check_password_hash(user_data.password, json_data["password"]):
-        return {"message": "Wrong password input"}, 401
-
-    return jsonify(UserSchema().dump(user_data))
-
-
-# @api.route("/user/logout", methods=["GET"])
-# def logout_user():
-
-
 @api.route("/user/<int:user_id>", methods=["PUT"])
 @auth.login_required
 def update_user(user_id):
