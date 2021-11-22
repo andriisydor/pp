@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import NoResultFound
-from marshmallow import Schema, fields, ValidationError, pre_load
+from marshmallow import ValidationError
 from schemas import UserSchema, SongSchema, PlaylistSchema
 from models import Session, User, Playlist, Song, playlist_song
 
@@ -12,8 +12,8 @@ from access import check_user_by_id, check_user_by_found
 
 
 api = Flask(__name__)
-api.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:123abc!!!@127.0.0.1:3306/music_player"
-db = SQLAlchemy(api)
+# api.config["SQLALCHEMY_DATABASE_URI"] = "mysql://root:123abc!!!@127.0.0.1:3306/music_player"
+# db = SQLAlchemy(api)
 bcrypt = Bcrypt(api)
 
 auth = HTTPBasicAuth()
@@ -498,5 +498,5 @@ def delete_user(user_id):
 
 
 if __name__ == "__main__":
-    db.create_all()
+    # db.create_all()
     api.run(debug=True, port=5000)
