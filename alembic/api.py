@@ -1,5 +1,3 @@
-import datetime
-
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -34,8 +32,14 @@ def auth_error(status):
     return "Access Denied", status
 
 
+# admin-user
+@auth.get_user_roles
+def get_user_roles(user):
+    return user
+
+
 @api.route("/song", methods=["POST"])
-@auth.login_required
+@auth.login_required(role='admin')
 def create_song():
     session = Session()
 
@@ -72,7 +76,7 @@ def get_song(song_id):
 
 
 @api.route("/song/<int:song_id>", methods=["PUT"])
-@auth.login_required
+@auth.login_required(role='admin')
 def update_song(song_id):
     session = Session()
     json_data = request.get_json()
@@ -112,7 +116,7 @@ def update_song(song_id):
 
 
 @api.route("/song/<int:song_id>", methods=["DELETE"])
-@auth.login_required
+@auth.login_required(role='admin')
 def delete_song(song_id):
     session = Session()
     try:
