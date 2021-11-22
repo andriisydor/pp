@@ -201,6 +201,10 @@ def update_playlist(playlist_id):
     if authentication and playlist.private:
         return authentication
 
+    # not let other change your public playlist to private
+    if authentication and "private" in json_data and not playlist.private:
+        return authentication
+
     # checking if suitable new user_id
     if "user_id" in json_data:
         return {"message": f"You can not change the owner"}, 403
