@@ -248,7 +248,7 @@ def delete_playlist(playlist_id):
 
     # authentication
     authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
-    if authentication and playlist.private:
+    if authentication:
         return authentication
 
     session.delete(playlist)
