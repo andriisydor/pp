@@ -215,7 +215,7 @@ def update_playlist(playlist_id):
         if exists and exists.id == playlist_id:
             exists = None
     if exists:
-        return {"message": f"User with id = {exists.id} already has a playlist with the same title"}, 400
+        return {"message": f"User with id = {exists.user_id} already has a playlist with the same title"}, 400
 
     attributes = Playlist.__dict__.keys()
 
