@@ -15,8 +15,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-
-engine = create_engine("mysql://root:A2452756b@127.0.0.1/music_player")
+# "mysql://root:A2452756b@127.0.0.1/music_player"
+engine = create_engine("mysql://root:123abc!!!@127.0.0.1:3306/music_player", pool_size=100, max_overflow=0)
 
 SessionFactory = sessionmaker(bind=engine)
 
