@@ -1,12 +1,7 @@
-import datetime
-
-from flask import Flask, request
-from sqlalchemy.exc import NoResultFound
-from marshmallow import Schema, fields, ValidationError, pre_load
-from models import Session , User, Playlist,Song
+from marshmallow import Schema, fields
 
 
-##### SCHEMAS #####
+# SCHEMAS
 
 class UserSchema(Schema):
     id = fields.Int()
