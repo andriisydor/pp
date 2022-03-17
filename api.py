@@ -7,16 +7,20 @@ from models import Session, User, Playlist, Song, playlist_song
 from config import app
 from access import check_user_by_id, check_user_by_found
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
+from config import ADMIN_NAME
 
 
 api = Blueprint('api', __name__)
 bcrypt = Bcrypt(app)
 
 
-# admin role!
 @api.route("/song", methods=["POST"])
+@jwt_required()
 def create_song():
     session = Session()
+
+    if get_jwt_identity() != ADMIN_NAME:
+        return "Access Denied", 401
 
     json_data = request.get_json()
     if not json_data:
@@ -49,11 +53,14 @@ def get_song(song_id):
     return jsonify(SongSchema().dump(song))
 
 
-# admin role!
 @api.route("/song/<int:song_id>", methods=["PUT"])
+@jwt_required()
 def update_song(song_id):
     session = Session()
     json_data = request.get_json()
+
+    if get_jwt_identity() != ADMIN_NAME:
+        return "Access Denied", 401
 
     try:
         song = session.query(Song).filter_by(id=song_id).one()
@@ -89,10 +96,14 @@ def update_song(song_id):
     return jsonify(SongSchema().dump(song))
 
 
-# admin role!
 @api.route("/song/<int:song_id>", methods=["DELETE"])
+@jwt_required()
 def delete_song(song_id):
     session = Session()
+
+    if get_jwt_identity() != ADMIN_NAME:
+        return "Access Denied", 401
+
     try:
         song = session.query(Song).filter_by(id=song_id).one()
     except NoResultFound:
@@ -363,7 +374,6 @@ def get_service_playlists_by_user_id(user_id):
     return jsonify(schema.dump(private_playlists + public_playlists))
 
 
-# no token
 @api.route("/user", methods=["POST"])
 def create_user():
     session = Session()
