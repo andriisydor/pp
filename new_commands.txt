@@ -1,0 +1,23 @@
+
+
+-H "Authorization: Bearer "
+
+-----------------------------------------------------------------------
+USER
+-----------------------------------------------------------------------
+create
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"username\":\"user123\", \"password\":\"qwerty123\", \"email\":\"tmp@gmail.com\"}" http://localhost:5000/user
+
+login
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"username\":\"user123\", \"password\":\"qwerty123\"}" http://localhost:5000/user/login
+
+update
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"email\":\"123123123123@gmail.com\"}" http://localhost:5000/user/24 -H "Authorization: Bearer "
+
+delete
+curl -X DELETE http://localhost:5000/user/24 -H "Authorization: Bearer "
+
+----------------------------------------------------------------------
+
+
+
