@@ -5,39 +5,22 @@ from marshmallow import ValidationError
 from schemas import UserSchema, SongSchema, PlaylistSchema
 from models import Session, User, Playlist, Song, playlist_song
 from config import app
-
-# authentication
-from flask_httpauth import HTTPBasicAuth
 from access import check_user_by_id, check_user_by_found
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
+from config import ADMIN_NAME
+
 
 api = Blueprint('api', __name__)
 bcrypt = Bcrypt(app)
-auth = HTTPBasicAuth()
-
-
-@auth.verify_password
-def verify_password(username, password):
-    session = Session()
-    user_data = session.query(User).filter_by(username=username).first()
-    if user_data and bcrypt.check_password_hash(user_data.password, password):
-        return username
-
-
-@auth.error_handler
-def auth_error(status):
-    return "Access Denied", status
-
-
-# admin-user
-@auth.get_user_roles
-def get_user_roles(user):
-    return user
 
 
 @api.route("/song", methods=["POST"])
-@auth.login_required(role='admin')
+@jwt_required()
 def create_song():
     session = Session()
+
+    if get_jwt_identity() != ADMIN_NAME:
+        return "Access Denied", 401
 
     json_data = request.get_json()
     if not json_data:
@@ -61,7 +44,6 @@ def create_song():
 
 
 @api.route("/song/<int:song_id>", methods=["GET"])
-@auth.login_required
 def get_song(song_id):
     session = Session()
     try:
@@ -72,10 +54,13 @@ def get_song(song_id):
 
 
 @api.route("/song/<int:song_id>", methods=["PUT"])
-@auth.login_required(role='admin')
+@jwt_required()
 def update_song(song_id):
     session = Session()
     json_data = request.get_json()
+
+    if get_jwt_identity() != ADMIN_NAME:
+        return "Access Denied", 401
 
     try:
         song = session.query(Song).filter_by(id=song_id).one()
@@ -112,9 +97,13 @@ def update_song(song_id):
 
 
 @api.route("/song/<int:song_id>", methods=["DELETE"])
-@auth.login_required(role='admin')
+@jwt_required()
 def delete_song(song_id):
     session = Session()
+
+    if get_jwt_identity() != ADMIN_NAME:
+        return "Access Denied", 401
+
     try:
         song = session.query(Song).filter_by(id=song_id).one()
     except NoResultFound:
@@ -130,7 +119,7 @@ def delete_song(song_id):
 
 
 @api.route("/playlist", methods=["POST"])
-@auth.login_required
+@jwt_required()
 def create_playlist():
     session = Session()
 
@@ -154,7 +143,7 @@ def create_playlist():
         return {"message": "User with this id does not exist"}, 400
 
     # authentication
-    authentication = check_user_by_found(user_data, auth.current_user())
+    authentication = check_user_by_found(user_data, get_jwt_identity())
     if authentication:
         return authentication
 
@@ -165,7 +154,7 @@ def create_playlist():
 
 
 @api.route("/playlist/<int:playlist_id>", methods=["GET"])
-@auth.login_required
+@jwt_required()
 def get_playlist(playlist_id):
     session = Session()
     try:
@@ -174,7 +163,7 @@ def get_playlist(playlist_id):
         return {"message": "Playlist with this id does not exist."}, 400
 
     # authentication
-    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    authentication = check_user_by_id(session, playlist.user_id, get_jwt_identity())
     if authentication and playlist.private:
         return authentication
 
@@ -182,7 +171,7 @@ def get_playlist(playlist_id):
 
 
 @api.route("/playlist/<int:playlist_id>", methods=["PUT"])
-@auth.login_required
+@jwt_required()
 def update_playlist(playlist_id):
     session = Session()
     json_data = request.get_json()
@@ -193,7 +182,7 @@ def update_playlist(playlist_id):
         return {"message": "Playlist with this id does not exist."}, 400
 
     # authentication
-    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    authentication = check_user_by_id(session, playlist.user_id, get_jwt_identity())
     if authentication and playlist.private:
         return authentication
 
@@ -242,7 +231,7 @@ def update_playlist(playlist_id):
 
 
 @api.route("/playlist/<int:playlist_id>", methods=["DELETE"])
-@auth.login_required
+@jwt_required()
 def delete_playlist(playlist_id):
     session = Session()
     try:
@@ -251,7 +240,7 @@ def delete_playlist(playlist_id):
         return {"message": "Playlist with this id does not exist."}, 400
 
     # authentication
-    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    authentication = check_user_by_id(session, playlist.user_id, get_jwt_identity())
     if authentication:
         return authentication
 
@@ -261,7 +250,7 @@ def delete_playlist(playlist_id):
 
 
 @api.route("/playlist/song/<int:song_id>", methods=["PUT"])
-@auth.login_required
+@jwt_required()
 def add_song_to_playlist(song_id):
     session = Session()
     json_data = request.get_json()
@@ -283,7 +272,7 @@ def add_song_to_playlist(song_id):
         return {"message": "Playlist with this id does not exist."}, 400
 
     # authentication
-    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    authentication = check_user_by_id(session, playlist.user_id, get_jwt_identity())
     if authentication and playlist.private:
         return authentication
 
@@ -295,7 +284,7 @@ def add_song_to_playlist(song_id):
 
 
 @api.route("/playlist/song/<int:song_id>", methods=["DELETE"])
-@auth.login_required
+@jwt_required()
 def delete_song_from_playlist(song_id):
     session = Session()
     json_data = request.get_json()
@@ -320,7 +309,7 @@ def delete_song_from_playlist(song_id):
         return {"message": "Playlist with this id does not exist."}, 400
 
     # authentication
-    authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+    authentication = check_user_by_id(session, playlist.user_id, get_jwt_identity())
     if authentication and playlist.private:
         return authentication
 
@@ -336,7 +325,6 @@ def delete_song_from_playlist(song_id):
 
 
 @api.route("/service", methods=["GET"])
-@auth.login_required
 def get_service_playlists():
     session = Session()
     playlists = session.query(Playlist).filter_by(private='0').all()
@@ -347,7 +335,7 @@ def get_service_playlists():
 
 
 @api.route("/service/<int:playlist_id>", methods=["GET"])
-@auth.login_required
+@jwt_required()
 def get_service_playlist_by_id(playlist_id):
     session = Session()
     try:
@@ -357,7 +345,7 @@ def get_service_playlist_by_id(playlist_id):
 
     # authentication
     if playlist.private:
-        authentication = check_user_by_id(session, playlist.user_id, auth.current_user())
+        authentication = check_user_by_id(session, playlist.user_id, get_jwt_identity())
         if authentication:
             return authentication
 
@@ -365,8 +353,32 @@ def get_service_playlist_by_id(playlist_id):
 
 
 @api.route("/service/user/<int:user_id>", methods=["GET"])
-@auth.login_required
+@jwt_required()
 def get_service_playlists_by_user_id(user_id):
+    session = Session()
+    try:
+        private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1").all()
+        if session.query(User).filter_by(id=user_id).first():
+            public_playlists = session.query(Playlist).filter_by(user_id=user_id, private="0").all()
+        else:
+            return {"message": "User with this id does not exist."}, 400
+    except NoResultFound:
+        return {"message": "Playlist with this id does not exist."}, 400
+
+    # authentication
+    authentication = check_user_by_id(session, user_id, get_jwt_identity())
+    if authentication and authentication[1] == 400:
+        return authentication
+    elif authentication and authentication[1] == 401:
+        private_playlists = []
+
+    schema = PlaylistSchema(many=True)
+    return jsonify(schema.dump(private_playlists + public_playlists))
+
+
+@api.route("/service/users/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_service_all_playlists_for_user_id(user_id):
     session = Session()
     try:
         private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1").all()
@@ -378,7 +390,7 @@ def get_service_playlists_by_user_id(user_id):
         return {"message": "Playlist with this id does not exist."}, 400
 
     # authentication
-    authentication = check_user_by_id(session, user_id, auth.current_user())
+    authentication = check_user_by_id(session, user_id, get_jwt_identity())
     if authentication:
         return authentication
 
@@ -411,12 +423,14 @@ def create_user():
 
     session.add(user)
     session.commit()
+    access_token = create_access_token(identity=user.username)
 
-    return jsonify(UserSchema().dump(user))
+    # return jsonify(UserSchema().dump(user))
+    return {'token': access_token}
 
 
 @api.route("/user/<int:user_id>", methods=["PUT"])
-@auth.login_required
+@jwt_required()
 def update_user(user_id):
     session = Session()
     json_data = request.get_json()
@@ -427,7 +441,7 @@ def update_user(user_id):
         return {"message": "User with this id does not exist."}, 400
 
     # authentication of user
-    authentication = check_user_by_found(user, auth.current_user())
+    authentication = check_user_by_found(user, get_jwt_identity())
     if authentication:
         return authentication
 
@@ -473,7 +487,7 @@ def update_user(user_id):
 
 
 @api.route("/user/<int:user_id>", methods=["DELETE"])
-@auth.login_required
+@jwt_required()
 def delete_user(user_id):
     session = Session()
     try:
@@ -482,7 +496,7 @@ def delete_user(user_id):
         return {"message": "User with this id does not exist."}, 400
 
     # authentication of user
-    authentication = check_user_by_found(user, auth.current_user())
+    authentication = check_user_by_found(user, get_jwt_identity())
     if authentication:
         return authentication
 
@@ -497,6 +511,23 @@ def delete_user(user_id):
     return {"message": "Successfully deleted user."}
 
 
-# if __name__ == "__main__":
-#     # db.create_all()
-#     api.run(debug=True, port=5000)
+@api.route('/user/login', methods=['POST'])
+def login_user():
+    session = Session()
+    data = request.get_json()
+
+    if not data or 'username' not in data or 'password' not in data:
+        return {'message': 'Wrong input data provided'}, 400
+
+    user = session.query(User).filter_by(username=data['username']).first()
+
+    if user is None:
+        return {'message': 'User not found'}, 404
+
+    if not bcrypt.check_password_hash(user.password, data['password']):
+        return {'message': 'Invalid username or password provided'}, 400
+
+    access_token = create_access_token(identity=user.username)
+    session.close()
+
+    return {'token': access_token}

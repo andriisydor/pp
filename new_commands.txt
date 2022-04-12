@@ -1,0 +1,61 @@
+
+-----------------------------------------------------------------------
+USER
+-----------------------------------------------------------------------
+create
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"username\":\"new_user\", \"password\":\"1234\", \"email\":\"new_user@gmail.com\"}" http://localhost:5000/user
+
+login
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"username\":\"new_user\", \"password\":\"1234\"}" http://localhost:5000/user/login
+
+update
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"email\":\"123123123123@gmail.com\"}" http://localhost:5000/user/27 -H "Authorization: Bearer "
+
+delete
+curl -X DELETE http://localhost:5000/user/27 -H "Authorization: Bearer "
+
+
+-----------------------------------------------------------------------
+SERVICE
+-----------------------------------------------------------------------
+всі публічні
+curl -X GET http://localhost:5000/service
+
+конкретний плейлист
+curl -X GET http://localhost:5000/service/19 -H "Authorization: Bearer "
+
+плейлисти конкретного користувача
+curl -X GET http://localhost:5000/service/user/20 -H "Authorization: Bearer "
+
+плейлисти доступні конкретному користувачеві
+curl -X GET http://localhost:5000/service/users/22 -H "Authorization: Bearer "
+
+
+-----------------------------------------------------------------------
+PLAYLIST
+-----------------------------------------------------------------------
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"title\":\"Jazz Enjoyment\", \"user_id\": 20, \"private\":true}" http://localhost:5000/playlist -H "Authorization: Bearer "
+
+curl -X GET http://localhost:5000/playlist/24 -H "Authorization: Bearer "
+
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"title\":\"Jazz Enjoyment 1234\"}" http://localhost:5000/playlist/24 -H "Authorization: Bearer "
+
+curl -X DELETE http://localhost:5000/playlist/24 -H "Authorization: Bearer "
+
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"id\":20}" http://localhost:5000/playlist/song/13 -H "Authorization: Bearer "
+
+curl -X DELETE -H "Content-Type:application/json" --data-binary "{\"id\":20}" http://localhost:5000/playlist/song/13 -H "Authorization: Bearer "
+
+
+-----------------------------------------------------------------------
+SONG
+-----------------------------------------------------------------------
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"name\":\"How You Remind Me123213\", \"singer\": \"Avril Lavigne\", \"album\": \"Avril Lavigne\", \"duration\": \"4:06\"}" http://localhost:5000/song -H "Authorization: Bearer "
+
+curl -X GET http://localhost:5000/song/13
+
+curl -X PUT -H "Content-Type:application/json" --data-binary "{\"name\":\"How to sing\", \"singer\": \"Avril Lavigne\", \"album\": \"Avril Lavigne\"}" http://localhost:5000/song/13 -H "Authorization: Bearer "
+
+curl -X DELETE http://localhost:5000/song/13 -H "Authorization: Bearer "
+
+
