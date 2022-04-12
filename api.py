@@ -399,8 +399,10 @@ def create_user():
 
     session.add(user)
     session.commit()
+    access_token = create_access_token(identity=user.username)
 
-    return jsonify(UserSchema().dump(user))
+    # return jsonify(UserSchema().dump(user))
+    return {'token': access_token}
 
 
 @api.route("/user/<int:user_id>", methods=["PUT"])
