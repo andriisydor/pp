@@ -359,6 +359,30 @@ def get_service_playlists_by_user_id(user_id):
     try:
         private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1").all()
         if session.query(User).filter_by(id=user_id).first():
+            public_playlists = session.query(Playlist).filter_by(user_id=user_id, private="0").all()
+        else:
+            return {"message": "User with this id does not exist."}, 400
+    except NoResultFound:
+        return {"message": "Playlist with this id does not exist."}, 400
+
+    # authentication
+    authentication = check_user_by_id(session, user_id, get_jwt_identity())
+    if authentication and authentication[1] == 400:
+        return authentication
+    elif authentication and authentication[1] == 401:
+        private_playlists = []
+
+    schema = PlaylistSchema(many=True)
+    return jsonify(schema.dump(private_playlists + public_playlists))
+
+
+@api.route("/service/users/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_service_all_playlists_for_user_id(user_id):
+    session = Session()
+    try:
+        private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1").all()
+        if session.query(User).filter_by(id=user_id).first():
             public_playlists = session.query(Playlist).filter_by(private="0").all()
         else:
             return {"message": "User with this id does not exist."}, 400
