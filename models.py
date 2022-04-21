@@ -17,7 +17,7 @@ class User(Base):
     username = Column(VARCHAR(length=200))
     password = Column(VARCHAR(length=200))
     email = Column(VARCHAR(length=200))
-    playlists = relationship("Playlist", backref= "user")
+    playlists = relationship("Playlist", backref="user")
 
     def __repr__(self):
         return f"<User {self.username}, email: {self.email}>"
