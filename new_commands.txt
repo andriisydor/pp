@@ -59,3 +59,7 @@ curl -X PUT -H "Content-Type:application/json" --data-binary "{\"name\":\"How to
 curl -X DELETE http://localhost:5000/song/13 -H "Authorization: Bearer "
 
 
+
+curl -X POST -H "Content-Type:application/json" --data-binary "{\"name\":\"How You Remind Me123213\", \"singer\": \"Avril Lavigne\", \"album\": \"Avril Lavigne\", \"duration\": \"4:06\", \"photo\": \"\"}" http://localhost:5000/song -H "Authorization: "
+
+
