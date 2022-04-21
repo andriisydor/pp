@@ -8,6 +8,7 @@ SONG
 
 curl -X POST -H "Content-Type:application/json" --data-binary "{\"name\":\"How You Remind Me\", \"singer\": \"Avril Lavigne\", \"album\": \"Avril Lavigne\", \"duration\": \"4:06\"}" http://localhost:5000/song
 
+curl -X GET "http://localhost:5000/songs?offset=0&limit=10"
 curl -X GET http://localhost:5000/song/1
 
 curl -X PUT -H "Content-Type:application/json" --data-binary "{\"name\":\"How to sing\", \"singer\": \"Avril Lavigne\", \"album\": \"Avril Lavigne\"}" http://localhost:5000/song/2

@@ -1,6 +1,7 @@
 from flask import request, jsonify, Blueprint
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy import or_
 from marshmallow import ValidationError
 from schemas import UserSchema, SongSchema, PlaylistSchema
 from models import Session, User, Playlist, Song, playlist_song
@@ -51,6 +52,27 @@ def get_song(song_id):
     except NoResultFound:
         return {"message": "Song with this id does not exist."}, 400
     return jsonify(SongSchema().dump(song))
+
+
+@api.route("/songs", methods=["GET"])
+def get_all_songs():
+    session = Session()
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+    try:
+        if q:
+            song = session.query(Song).order_by(Song.id)\
+                .filter(or_(Song.name.like(search), Song.singer.like(search))).offset(offset).limit(limit)
+        else:
+            song = session.query(Song).order_by(Song.id).offset(offset).limit(limit)
+    except NoResultFound:
+        return {"message": "Songs do not exist."}, 400
+    schema = SongSchema(many=True)
+    return jsonify(schema.dump(song))
 
 
 @api.route("/song/<int:song_id>", methods=["PUT"])
