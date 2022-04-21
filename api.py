@@ -433,10 +433,29 @@ def get_service_playlists_by_user_id(user_id):
 @jwt_required()
 def get_service_all_playlists_for_user_id(user_id):
     session = Session()
+
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+
     try:
-        private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1").all()
+        if q:
+            private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1")\
+                .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
+        else:
+            private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1") \
+                .order_by(Playlist.id).offset(offset).limit(limit)
+
         if session.query(User).filter_by(id=user_id).first():
-            public_playlists = session.query(Playlist).filter_by(private="0").all()
+            if q:
+                public_playlists = session.query(Playlist).filter_by(private="0")\
+                    .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
+            else:
+                public_playlists = session.query(Playlist).filter_by(private="0") \
+                    .order_by(Playlist.id).offset(offset).limit(limit)
         else:
             return {"message": "User with this id does not exist."}, 400
     except NoResultFound:
@@ -448,7 +467,7 @@ def get_service_all_playlists_for_user_id(user_id):
         return authentication
 
     schema = PlaylistSchema(many=True)
-    return jsonify(schema.dump(private_playlists + public_playlists))
+    return jsonify(schema.dump(list(private_playlists) + list(public_playlists)))
 
 
 @api.route("/user", methods=["POST"])
