@@ -349,7 +349,20 @@ def delete_song_from_playlist(song_id):
 @api.route("/service", methods=["GET"])
 def get_service_playlists():
     session = Session()
-    playlists = session.query(Playlist).filter_by(private='0').all()
+
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+
+    if q:
+        playlists = session.query(Playlist).filter_by(private='0').order_by(Playlist.id) \
+            .filter(Playlist.title.like(search)).offset(offset).limit(limit)
+    else:
+        playlists = session.query(Playlist).filter_by(private='0').order_by(Playlist.id).offset(offset).limit(limit)
+
     if not playlists:
         return {"message": "There are no playlists"}, 400
     schema = PlaylistSchema(many=True)

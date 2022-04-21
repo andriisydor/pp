@@ -20,6 +20,7 @@ SERVICE
 -----------------------------------------------------------------------
 всі публічні
 curl -X GET http://localhost:5000/service
+curl -X GET "http://localhost:5000/service?limit=10&offset=0&q=test+123"
 
 конкретний плейлист
 curl -X GET http://localhost:5000/service/19 -H "Authorization: Bearer "
