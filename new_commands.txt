@@ -27,6 +27,7 @@ curl -X GET http://localhost:5000/service/19 -H "Authorization: Bearer "
 
 плейлисти конкретного користувача
 curl -X GET http://localhost:5000/service/user/20 -H "Authorization: Bearer "
+curl -X GET "http://localhost:5000/service/user/20?limit=10&offset=0&q=test" -H "Authorization: Bearer "
 
 плейлисти доступні конкретному користувачеві
 curl -X GET http://localhost:5000/service/users/22 -H "Authorization: Bearer "
