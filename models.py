@@ -33,6 +33,7 @@ playlist_song = Table('playlist_song',
 class Song(Base):
     __tablename__ = 'song'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    photo = Column(VARCHAR(length=2083), nullable=True)
     name = Column(VARCHAR(length=200), nullable=False)
     singer = Column(VARCHAR(length=200))
     album = Column(VARCHAR(length=200))
