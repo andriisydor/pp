@@ -1,7 +1,7 @@
 from flask import request, jsonify, Blueprint
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from marshmallow import ValidationError
 from schemas import UserSchema, SongSchema, PlaylistSchema
 from models import Session, User, Playlist, Song, playlist_song
@@ -436,19 +436,13 @@ def get_service_all_playlists_for_user_id(user_id):
     search = f"%{q}%"
 
     try:
-        if q:
-            private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1")\
-                .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
-        else:
-            private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1") \
-                .order_by(Playlist.id).offset(offset).limit(limit)
-
         if session.query(User).filter_by(id=user_id).first():
             if q:
-                public_playlists = session.query(Playlist).filter_by(private="0")\
+                playlists = session.query(Playlist)\
+                    .filter(or_(and_(Playlist.user_id == user_id, Playlist.private == "1"), Playlist.private == "0"))\
                     .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
             else:
-                public_playlists = session.query(Playlist).filter_by(private="0") \
+                playlists = session.query(Playlist).filter_by(private="0") \
                     .order_by(Playlist.id).offset(offset).limit(limit)
         else:
             return {"message": "User with this id does not exist."}, 400
@@ -461,7 +455,7 @@ def get_service_all_playlists_for_user_id(user_id):
         return authentication
 
     schema = PlaylistSchema(many=True)
-    return jsonify(schema.dump(list(private_playlists) + list(public_playlists)))
+    return jsonify(schema.dump(list(playlists)))
 
 
 @api.route("/user", methods=["POST"])
