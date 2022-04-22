@@ -402,10 +402,10 @@ def get_service_playlists_by_user_id(user_id):
     try:
         if session.query(User).filter_by(id=user_id).first():
             if q:
-                public_playlists = session.query(Playlist).filter_by(user_id=user_id)\
+                playlists = session.query(Playlist).filter_by(user_id=user_id)\
                     .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
             else:
-                public_playlists = session.query(Playlist).filter_by(user_id=user_id)\
+                playlists = session.query(Playlist).filter_by(user_id=user_id)\
                     .order_by(Playlist.id).offset(offset).limit(limit)
         else:
             return {"message": "User with this id does not exist."}, 400
@@ -420,7 +420,7 @@ def get_service_playlists_by_user_id(user_id):
         private_playlists = []
 
     schema = PlaylistSchema(many=True)
-    return jsonify(schema.dump(list(public_playlists)))
+    return jsonify(schema.dump(list(playlists)))
 
 
 @api.route("/service/users/<int:user_id>", methods=["GET"])
