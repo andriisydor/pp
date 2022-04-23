@@ -17,7 +17,7 @@ class User(Base):
     username = Column(VARCHAR(length=200))
     password = Column(VARCHAR(length=200))
     email = Column(VARCHAR(length=200))
-    playlists = relationship("Playlist", backref= "user")
+    playlists = relationship("Playlist", backref="user")
 
     def __repr__(self):
         return f"<User {self.username}, email: {self.email}>"
@@ -33,6 +33,7 @@ playlist_song = Table('playlist_song',
 class Song(Base):
     __tablename__ = 'song'
     id = Column(Integer, primary_key=True, autoincrement=True)
+    photo = Column(VARCHAR(length=2083), nullable=True)
     name = Column(VARCHAR(length=200), nullable=False)
     singer = Column(VARCHAR(length=200))
     album = Column(VARCHAR(length=200))

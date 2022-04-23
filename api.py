@@ -1,6 +1,7 @@
 from flask import request, jsonify, Blueprint
 from flask_bcrypt import Bcrypt
 from sqlalchemy.exc import NoResultFound
+from sqlalchemy import or_, and_
 from marshmallow import ValidationError
 from schemas import UserSchema, SongSchema, PlaylistSchema
 from models import Session, User, Playlist, Song, playlist_song
@@ -51,6 +52,27 @@ def get_song(song_id):
     except NoResultFound:
         return {"message": "Song with this id does not exist."}, 400
     return jsonify(SongSchema().dump(song))
+
+
+@api.route("/songs", methods=["GET"])
+def get_all_songs():
+    session = Session()
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+    try:
+        if q:
+            song = session.query(Song).order_by(Song.id)\
+                .filter(or_(Song.name.like(search), Song.singer.like(search))).offset(offset).limit(limit)
+        else:
+            song = session.query(Song).order_by(Song.id).offset(offset).limit(limit)
+    except NoResultFound:
+        return {"message": "Songs do not exist."}, 400
+    schema = SongSchema(many=True)
+    return jsonify(schema.dump(song))
 
 
 @api.route("/song/<int:song_id>", methods=["PUT"])
@@ -327,7 +349,20 @@ def delete_song_from_playlist(song_id):
 @api.route("/service", methods=["GET"])
 def get_service_playlists():
     session = Session()
-    playlists = session.query(Playlist).filter_by(private='0').all()
+
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+
+    if q:
+        playlists = session.query(Playlist).filter_by(private='0').order_by(Playlist.id) \
+            .filter(Playlist.title.like(search)).offset(offset).limit(limit)
+    else:
+        playlists = session.query(Playlist).filter_by(private='0').order_by(Playlist.id).offset(offset).limit(limit)
+
     if not playlists:
         return {"message": "There are no playlists"}, 400
     schema = PlaylistSchema(many=True)
@@ -356,10 +391,22 @@ def get_service_playlist_by_id(playlist_id):
 @jwt_required()
 def get_service_playlists_by_user_id(user_id):
     session = Session()
+
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+
     try:
-        private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1").all()
         if session.query(User).filter_by(id=user_id).first():
-            public_playlists = session.query(Playlist).filter_by(user_id=user_id, private="0").all()
+            if q:
+                playlists = session.query(Playlist).filter_by(user_id=user_id)\
+                    .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
+            else:
+                playlists = session.query(Playlist).filter_by(user_id=user_id)\
+                    .order_by(Playlist.id).offset(offset).limit(limit)
         else:
             return {"message": "User with this id does not exist."}, 400
     except NoResultFound:
@@ -373,17 +420,31 @@ def get_service_playlists_by_user_id(user_id):
         private_playlists = []
 
     schema = PlaylistSchema(many=True)
-    return jsonify(schema.dump(private_playlists + public_playlists))
+    return jsonify(schema.dump(list(playlists)))
 
 
 @api.route("/service/users/<int:user_id>", methods=["GET"])
 @jwt_required()
 def get_service_all_playlists_for_user_id(user_id):
     session = Session()
+
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+
     try:
-        private_playlists = session.query(Playlist).filter_by(user_id=user_id, private="1").all()
         if session.query(User).filter_by(id=user_id).first():
-            public_playlists = session.query(Playlist).filter_by(private="0").all()
+            if q:
+                playlists = session.query(Playlist)\
+                    .filter(or_(and_(Playlist.user_id == user_id, Playlist.private == "1"), Playlist.private == "0"))\
+                    .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
+            else:
+                playlists = session.query(Playlist) \
+                    .filter(or_(and_(Playlist.user_id == user_id, Playlist.private == "1"), Playlist.private == "0")) \
+                    .order_by(Playlist.id).offset(offset).limit(limit)
         else:
             return {"message": "User with this id does not exist."}, 400
     except NoResultFound:
@@ -395,7 +456,35 @@ def get_service_all_playlists_for_user_id(user_id):
         return authentication
 
     schema = PlaylistSchema(many=True)
-    return jsonify(schema.dump(private_playlists + public_playlists))
+    return jsonify(schema.dump(list(playlists)))
+
+
+@api.route("/service/public/user/<int:user_id>", methods=["GET"])
+def get_service_public_playlists_by_user_id(user_id):
+    session = Session()
+
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+
+    try:
+        if session.query(User).filter_by(id=user_id).first():
+            if q:
+                playlists = session.query(Playlist).filter_by(user_id=user_id, private="0")\
+                    .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
+            else:
+                playlists = session.query(Playlist).filter_by(user_id=user_id, private="0")\
+                    .order_by(Playlist.id).offset(offset).limit(limit)
+        else:
+            return {"message": "User with this id does not exist."}, 400
+    except NoResultFound:
+        return {"message": "Playlist with this id does not exist."}, 400
+
+    schema = PlaylistSchema(many=True)
+    return jsonify(schema.dump(list(playlists)))
 
 
 @api.route("/user", methods=["POST"])
