@@ -442,7 +442,8 @@ def get_service_all_playlists_for_user_id(user_id):
                     .filter(or_(and_(Playlist.user_id == user_id, Playlist.private == "1"), Playlist.private == "0"))\
                     .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
             else:
-                playlists = session.query(Playlist).filter_by(private="0") \
+                playlists = session.query(Playlist) \
+                    .filter(or_(and_(Playlist.user_id == user_id, Playlist.private == "1"), Playlist.private == "0")) \
                     .order_by(Playlist.id).offset(offset).limit(limit)
         else:
             return {"message": "User with this id does not exist."}, 400
@@ -453,6 +454,34 @@ def get_service_all_playlists_for_user_id(user_id):
     authentication = check_user_by_id(session, user_id, get_jwt_identity())
     if authentication:
         return authentication
+
+    schema = PlaylistSchema(many=True)
+    return jsonify(schema.dump(list(playlists)))
+
+
+@api.route("/service/public/user/<int:user_id>", methods=["GET"])
+def get_service_public_playlists_by_user_id(user_id):
+    session = Session()
+
+    limit = request.args.get('limit', 20)
+    offset = request.args.get('offset', 0)
+    q = request.args.get('q', None)
+    if q:
+        q.replace('+', ' ')
+    search = f"%{q}%"
+
+    try:
+        if session.query(User).filter_by(id=user_id).first():
+            if q:
+                playlists = session.query(Playlist).filter_by(user_id=user_id, private="0")\
+                    .order_by(Playlist.id).filter(Playlist.title.like(search)).offset(offset).limit(limit)
+            else:
+                playlists = session.query(Playlist).filter_by(user_id=user_id, private="0")\
+                    .order_by(Playlist.id).offset(offset).limit(limit)
+        else:
+            return {"message": "User with this id does not exist."}, 400
+    except NoResultFound:
+        return {"message": "Playlist with this id does not exist."}, 400
 
     schema = PlaylistSchema(many=True)
     return jsonify(schema.dump(list(playlists)))
