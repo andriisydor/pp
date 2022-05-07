@@ -515,7 +515,7 @@ def create_user():
     access_token = create_access_token(identity=user.username)
 
     # return jsonify(UserSchema().dump(user))
-    return {'token': access_token}
+    return {'token': access_token, 'id': user.id}
 
 
 @api.route("/user/<int:user_id>", methods=["PUT"])
@@ -619,4 +619,4 @@ def login_user():
     access_token = create_access_token(identity=user.username)
     session.close()
 
-    return {'token': access_token}
+    return {'token': access_token, 'id': user.id}
