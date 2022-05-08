@@ -24,4 +24,5 @@ class PlaylistSchema(Schema):
     title = fields.Str()
     songs = fields.List(fields.Nested(SongSchema))
     user_id = fields.Int()
+    user = fields.Nested(UserSchema(only=("username",)))
     private = fields.Bool()
