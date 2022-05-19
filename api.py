@@ -620,3 +620,21 @@ def login_user():
     session.close()
 
     return {'token': access_token, 'id': user.id}
+
+
+@api.route("/user", methods=["GET"])
+@jwt_required()
+def get_user():
+    session = Session()
+    json_data = request.get_json()
+    try:
+        user = session.query(User).filter_by(username=get_jwt_identity()).one()
+    except NoResultFound:
+        return {"message": "Login error."}, 400
+
+    # authentication of user
+    authentication = check_user_by_found(user, get_jwt_identity())
+    if authentication:
+        return authentication
+    session.close()
+    return jsonify(UserSchema().dump(user))
