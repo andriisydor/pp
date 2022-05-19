@@ -572,7 +572,9 @@ def update_user(user_id):
 
     user = session.query(User).filter_by(id=user_id).first()
 
-    return jsonify(UserSchema().dump(user))
+    access_token = create_access_token(identity=user.username)
+    session.close()
+    return {'token': access_token, 'id': user.id}
 
 
 @api.route("/user/<int:user_id>", methods=["DELETE"])
