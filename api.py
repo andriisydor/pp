@@ -9,6 +9,7 @@ from config import app
 from access import check_user_by_id, check_user_by_found
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from config import ADMIN_NAME
+from sound import get_sound_diagram
 
 
 api = Blueprint('api', __name__)
@@ -640,3 +641,28 @@ def get_user():
         return authentication
     session.close()
     return jsonify(UserSchema().dump(user))
+
+
+@api.route("/diagram", methods=["GET"])
+@jwt_required()
+def get_diagram():
+    session = Session()
+
+    try:
+        user = session.query(User).filter_by(username=get_jwt_identity()).one()
+    except NoResultFound:
+        return {"message": "Login error."}, 400
+
+    # authentication of user
+    authentication = check_user_by_found(user, get_jwt_identity())
+    if authentication:
+        return authentication
+
+    sign = request.args.get('sign', 'plus')
+    song = request.args.get('song', '')
+    diagram = get_sound_diagram()
+    if sign == 'minus':
+        for i in range(len(diagram)):
+            diagram[i] = -diagram[i]
+    session.close()
+    return {'success': True, 'data': diagram}
