@@ -17,6 +17,7 @@ class SongSchema(Schema):
     album = fields.Str()
     duration = fields.Str()
     photo = fields.Str()
+    lyrics = fields.Str()
 
 
 class PlaylistSchema(Schema):

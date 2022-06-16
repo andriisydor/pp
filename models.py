@@ -38,6 +38,7 @@ class Song(Base):
     singer = Column(VARCHAR(length=200))
     album = Column(VARCHAR(length=200))
     duration = Column(VARCHAR(length=200), nullable=False)
+    lyrics = Column(VARCHAR(length=4000), nullable=True)
 
     def __repr__(self):
         return f"<Song {self.name} {self.singer} {self.album}  {self.duration}>"

@@ -33,6 +33,12 @@ def create_song():
     except ValidationError as err:
         return err.messages, 422
 
+    song_data['lyrics'] = list(song_data['lyrics'])
+    for i in range(len(song_data['lyrics'])):
+        if song_data['lyrics'][i] == '/':
+            song_data['lyrics'][i] = '\n'
+    song_data['lyrics'] = "".join(song_data['lyrics'])
+
     song = Song(**song_data)
 
     exists = session.query(Song).filter_by(name=json_data['name']).first()
