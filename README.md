@@ -17,3 +17,10 @@ open project and run app.py
 to create migration: alembic revision -- autogenerate -m "commit name"
 
 to run: alembic upgrade head
+
+Before using alembic: change db urls in alembic.ini and alembic\env.py
+
+# Project of other team members:
+https://github.com/olehratinskiy/ap_simple_store
+https://github.com/yuliamarkiv/pp_labs
+https://github.com/yarynabeida/AP
